@@ -1,75 +1,71 @@
 (function () {
-  console.log("[可云] mobile-enhance.js loaded");
+  console.log("可云 mobile-enhance.js loaded");
 
-  // ------------------------------
-  // 1. 自动折叠套餐说明（手机端）
-  // ------------------------------
-  function shortenPlanDescriptions() {
-    const blocks = document.querySelectorAll(".ant-card-body");
+  // 等待 React 渲染完成
+  function waitForPlans() {
+    const cards = document.querySelectorAll(".ant-card-body, .n-card__content");
+    if (cards.length === 0) {
+      requestAnimationFrame(waitForPlans);
+      return;
+    }
+    enhancePlans(cards);
+  }
 
-    blocks.forEach((block) => {
-      const fullText = block.innerText.trim();
+  function enhancePlans(cards) {
+    cards.forEach((card) => {
+      // 跳过已经处理的卡片
+      if (card.dataset.enhanced === "1") return;
 
-      if (fullText.length > 120 && !block.dataset.enhanced) {
-        block.dataset.enhanced = "1";
+      // 只处理含有“服务说明 / 套餐详情”标题的卡片
+      const title = card.innerText;
+      if (!/套餐详情|服务说明|流量|限速/.test(title)) return;
 
-        const shortText = fullText.slice(0, 120) + "...";
+      const lines = Array.from(card.querySelectorAll("li, p, div"));
+      if (lines.length < 5) return;
 
-        const wrapper = document.createElement("div");
-        wrapper.style.whiteSpace = "pre-wrap";
+      // 自动折叠区域
+      const collapseBox = document.createElement("div");
+      collapseBox.style.maxHeight = "120px";
+      collapseBox.style.overflow = "hidden";
+      collapseBox.style.transition = "max-height 0.25s ease";
+      collapseBox.className = "ky-collapse-box";
 
-        const textDom = document.createElement("div");
-        textDom.innerText = shortText;
+      // 把原内容放进折叠区
+      const wrapper = document.createElement("div");
+      lines.forEach((l) => wrapper.appendChild(l.cloneNode(true)));
+      collapseBox.appendChild(wrapper);
 
-        const btn = document.createElement("span");
-        btn.innerText = "展开详情";
-        btn.style.color = "#ff69a8";
-        btn.style.fontSize = "14px";
-        btn.style.marginLeft = "6px";
+      // 清空卡片内容
+      lines.forEach((l) => l.remove());
+      card.prepend(collapseBox);
 
-        wrapper.appendChild(textDom);
-        wrapper.appendChild(btn);
+      // “展开 / 收起” 按钮
+      const btn = document.createElement("div");
+      btn.innerText = "展开详情 ▼";
+      btn.style.marginTop = "8px";
+      btn.style.color = "#FF68A0";
+      btn.style.fontSize = "14px";
+      btn.style.fontWeight = "500";
+      btn.style.cursor = "pointer";
+      btn.style.userSelect = "none";
+      btn.style.textAlign = "center";
 
-        block.innerHTML = "";
-        block.appendChild(wrapper);
+      let expanded = false;
+      btn.onclick = () => {
+        expanded = !expanded;
+        if (expanded) {
+          collapseBox.style.maxHeight = wrapper.scrollHeight + "px";
+          btn.innerText = "收起详情 ▲";
+        } else {
+          collapseBox.style.maxHeight = "120px";
+          btn.innerText = "展开详情 ▼";
+        }
+      };
 
-        btn.addEventListener("click", () => {
-          textDom.innerText =
-            textDom.innerText === shortText ? fullText : shortText;
-          btn.innerText =
-            btn.innerText === "展开详情" ? "收起" : "展开详情";
-        });
-      }
+      card.appendChild(btn);
+      card.dataset.enhanced = "1";
     });
   }
 
-  // ------------------------------
-  // 2. 常驻购买栏（手机端）
-  // ------------------------------
-  function initBuyBar() {
-    if (document.getElementById("mobile-buy-bar")) return;
-
-    const bar = document.createElement("div");
-    bar.id = "mobile-buy-bar";
-    bar.style.position = "fixed";
-    bar.style.bottom = "0";
-    bar.style.left = "0";
-    bar.style.right = "0";
-    bar.style.height = "60px";
-    bar.style.display = "flex";
-    bar.style.justifyContent = "center";
-    bar.style.alignItems = "center";
-    bar.style.background = "white";
-    bar.style.boxShadow = "0 -2px 10px rgba(0,0,0,0.08)";
-    bar.style.zIndex = "9999";
-
-    bar.innerHTML = `
-      <button id="buy-btn"
-        style="
-          width: 90%;
-          height: 45px;
-          border: none;
-          border-radius: 10px;
-          background: linear-gradient(90deg,#ff7ab9,#ff54a3);
-          color: white;
-          font-size: 1
+  waitForPlans();
+})();
