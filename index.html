@@ -7,20 +7,24 @@
 
   <title>可云</title>
 
-  <script>
-    if (!localStorage.getItem("cf_verified")) {
-      if (!window.location.pathname.includes("verify.html")) {
-        window.location.href = "/verify.html";
-      }
-    }
-  </script>
+  <!-- ❌ 已删除：强制跳转 verify.html 逻辑 -->
+  <!-- Cloudflare 将自动处理人机验证 -->
 
+  <!-- 粉金主题 -->
   <link rel="stylesheet" href="/custom-theme.css">
+
+  <!-- 手机端增强（商品折叠 + 购买栏 + 卡片布局） -->
   <script defer src="/mobile-enhance.js"></script>
+
+  <!-- UMI 主 JS（XBoard 前端核心） -->
   <script type="module" crossorigin src="/assets/umi.js"></script>
 </head>
+
 <body>
+  <!-- 环境配置 -->
   <script src="./env.js"></script>
+
+  <!-- React 渲染容器 -->
   <div id="app"></div>
 </body>
 </html>
