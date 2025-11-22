@@ -7,24 +7,91 @@
 
   <title>可云</title>
 
-  <!-- ❌ 已删除：强制跳转 verify.html 逻辑 -->
-  <!-- Cloudflare 将自动处理人机验证 -->
+  <!-- 登录成功后的公告弹窗（每次登录弹 2 次） -->
+  <script>
+    (function () {
 
-  <!-- 粉金主题 -->
-  <link rel="stylesheet" href="/custom-theme.css">
+      // 登录时清空记录
+      sessionStorage.removeItem("first_popup_done");
+      sessionStorage.removeItem("second_popup_done");
 
-  <!-- 手机端增强（商品折叠 + 购买栏 + 卡片布局） -->
-  <script defer src="/mobile-enhance.js"></script>
+      function popupHTML() {
+        return `
+        <div class="notice-mask" id="noticePopup">
+          <div class="notice-box">
 
-  <!-- UMI 主 JS（XBoard 前端核心） -->
-  <script type="module" crossorigin src="/assets/umi.js"></script>
-</head>
+            <div class="notice-close" id="noticeClose">×</div>
 
-<body>
-  <!-- 环境配置 -->
-  <script src="./env.js"></script>
+            <h2 class="notice-title">📢 新人必看公告</h2>
 
-  <!-- React 渲染容器 -->
-  <div id="app"></div>
-</body>
-</html>
+            <p>欢迎来到可云，请务必阅读顶部公告栏信息。</p>
+            <p>请保存我们最新域名：<b>shy521.com</b></p>
+            <p>加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">点击加入</a></p>
+            <p>不会使用？请查看左侧「使用文档」。</p>
+
+            <button class="notice-btn" id="noticeBtn">我已知晓</button>
+
+          </div>
+        </div>`;
+      }
+
+      function showPopup() {
+        document.body.insertAdjacentHTML("beforeend", popupHTML());
+        const close = () => document.getElementById("noticePopup")?.remove();
+        document.getElementById("noticeClose").onclick = close;
+        document.getElementById("noticeBtn").onclick = close;
+      }
+
+      function dashboardReady() {
+        const t = document.body.innerText;
+        return t.includes("套餐") || t.includes("仪表盘") || t.includes("首页");
+      }
+
+      function beginPopupProcess() {
+
+        if (!sessionStorage.getItem("first_popup_done")) {
+          showPopup();
+          sessionStorage.setItem("first_popup_done", "1");
+        }
+
+        if (!sessionStorage.getItem("second_popup_done")) {
+
+          const waitFirstClose = setInterval(() => {
+            if (!document.getElementById("noticePopup")) {
+              clearInterval(waitFirstClose);
+
+              let clicked = false;
+              const clickListener = () => {
+                if (!clicked) {
+                  clicked = true;
+                  const delay = 3000 + Math.random() * 7000;
+                  setTimeout(() => {
+                    showPopup();
+                    sessionStorage.setItem("second_popup_done", "1");
+                  }, delay);
+                }
+              };
+
+              document.addEventListener("click", clickListener, { once: true });
+              setTimeout(() => document.removeEventListener("click", clickListener), 60000);
+            }
+          }, 300);
+        }
+      }
+
+      let checkCount = 0;
+      const checkLogin = setInterval(() => {
+        if (dashboardReady()) {
+          clearInterval(checkLogin);
+          beginPopupProcess();
+        }
+        if (++checkCount > 80) clearInterval(checkLogin);
+      }, 400);
+
+    })();
+  </script>
+
+  <!-- 加载主题 CSS -->
+  <link rel="stylesheet" href="/assets/custom-theme.css">
+
+  <!-- 手机端增强脚本：商品详情折叠 -->
