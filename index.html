@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
+
+  <title>可云</title>
+
+  <!-- 强制人机验证 -->
+  <script>
+    if (!localStorage.getItem("cf_verified")) {
+      if (!window.location.pathname.includes("verify.html")) {
+        window.location.href = "/verify.html";
+      }
+    }
+  </script>
+
+  <!-- 粉金主题 CSS -->
+  <link rel="stylesheet" href="/custom-theme.css">
+
+  <!-- 手机端增强脚本（折叠 + 购买栏 + 卡片布局）-->
+  <script defer src="/mobile-enhance.js"></script>
+
+  <!-- UMI 主文件 -->
+  <script type="module" crossorigin src="/assets/umi.js"></script>
+
+</head>
+
+<body>
+  <script src="./env.js"></script>
+  <div id="app"></div>
+</body>
+</html>
