@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>安全验证 - 可云</title>
-
   <style>
     body {
       margin: 0;
@@ -16,7 +15,6 @@
       background: linear-gradient(135deg, #ffe4f2, #ffd6ea, #ffb8d7);
       font-family: "Segoe UI", sans-serif;
     }
-
     .box {
       background: white;
       padding: 30px;
@@ -27,7 +25,6 @@
       border: 1px solid rgba(255,120,170,0.3);
       animation: fadeIn 0.5s ease-out;
     }
-
     h2 {
       margin-bottom: 15px;
       background: linear-gradient(90deg, #ff6faf, #ff9fd1, #ffd4e9);
@@ -35,21 +32,16 @@
       color: transparent;
       font-weight: 700;
     }
-
     .msg { color: #d96a9e; margin-bottom: 20px; font-size: 15px; }
-
     iframe { border: 0; width: 100%; height: 80px; }
   </style>
 </head>
-
 <body>
   <div class="box">
     <h2>可云 · 安全验证</h2>
     <div class="msg">请完成下方的人机验证以继续访问</div>
-
     <iframe src="https://challenges.cloudflare.com/turnstile/v0/beta?sitekey=0x4AAAAAACBHnys8HYE9DGGZ&callback=cf_done"></iframe>
   </div>
-
   <script>
     function cf_done() {
       localStorage.setItem("cf_verified", Date.now());
