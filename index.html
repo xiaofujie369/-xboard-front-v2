@@ -4,14 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport"
         content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
-
-  <title>可云</title>
+  <title>可云 Premium</title>
 
   <!-- 登录成功后的公告弹窗（每次登录弹 2 次） -->
   <script>
     (function () {
-
-      // 登录时清空记录
       sessionStorage.removeItem("first_popup_done");
       sessionStorage.removeItem("second_popup_done");
 
@@ -19,18 +16,13 @@
         return `
         <div class="notice-mask" id="noticePopup">
           <div class="notice-box">
-
             <div class="notice-close" id="noticeClose">×</div>
-
             <h2 class="notice-title">📢 新人必看公告</h2>
-
             <p>欢迎来到可云，请务必阅读顶部公告栏信息。</p>
             <p>请保存我们最新域名：<b>shy521.com</b></p>
             <p>加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">点击加入</a></p>
             <p>不会使用？请查看左侧「使用文档」。</p>
-
             <button class="notice-btn" id="noticeBtn">我已知晓</button>
-
           </div>
         </div>`;
       }
@@ -48,18 +40,15 @@
       }
 
       function beginPopupProcess() {
-
         if (!sessionStorage.getItem("first_popup_done")) {
           showPopup();
           sessionStorage.setItem("first_popup_done", "1");
         }
 
         if (!sessionStorage.getItem("second_popup_done")) {
-
           const waitFirstClose = setInterval(() => {
             if (!document.getElementById("noticePopup")) {
               clearInterval(waitFirstClose);
-
               let clicked = false;
               const clickListener = () => {
                 if (!clicked) {
@@ -71,7 +60,6 @@
                   }, delay);
                 }
               };
-
               document.addEventListener("click", clickListener, { once: true });
               setTimeout(() => document.removeEventListener("click", clickListener), 60000);
             }
@@ -87,11 +75,121 @@
         }
         if (++checkCount > 80) clearInterval(checkLogin);
       }, 400);
-
     })();
   </script>
 
-  <!-- 加载主题 CSS -->
-  <link rel="stylesheet" href="/assets/custom-theme.css">
+  <!-- 商务风增强样式 -->
+  <style>
+    .ky-premium-collapse-wrapper {
+      max-height: 120px;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+    .ky-premium-collapse-wrapper.open {
+      max-height: 800px;
+    }
+    .ky-premium-btn {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 13px;
+      color: #ff6fa8;
+      cursor: pointer;
+      user-select: none;
+    }
+    .notice-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .notice-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      width: 85%;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      position: relative;
+      font-family: "Helvetica Neue", "PingFang SC", sans-serif;
+    }
+    .notice-close {
+      position: absolute;
+      right: 14px;
+      top: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #999;
+    }
+    .notice-title {
+      margin-bottom: 12px;
+      color: #ff6fa8;
+    }
+    .notice-btn {
+      background: linear-gradient(135deg, #ff85c1, #ff6fa8);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 20px;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .notice-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
 
   <!-- 手机端增强脚本：商品详情折叠 -->
+  <script>
+    (function () {
+      console.log("可云 Premium 商务风增强 loaded");
+      function waitForPlans() {
+        const cards = document.querySelectorAll(".ant-card-body, .n-card__content");
+        if (cards.length === 0) {
+          requestAnimationFrame(waitForPlans);
+          return;
+        }
+        enhance(cards);
+      }
+      function enhance(cards) {
+        cards.forEach((card) => {
+          if (card.dataset.enhanced === "1") return;
+          const blocks = Array.from(card.querySelectorAll("li, p, div"));
+          if (blocks.length < 4) return;
+          const wrapper = document.createElement("div");
+          wrapper.className = "ky-premium-collapse-wrapper";
+          const inner = document.createElement("div");
+          inner.className = "ky-premium-inner-block";
+          blocks.forEach((b) => inner.appendChild(b.cloneNode(true)));
+          wrapper.appendChild(inner);
+          blocks.forEach((b) => b.remove());
+          card.prepend(wrapper);
+          const btn = document.createElement("div");
+          btn.className = "ky-premium-btn";
+          btn.innerText = "展开详情 ▼";
+          let expanded = false;
+          btn.onclick = () => {
+            expanded = !expanded;
+            if (expanded) {
+              wrapper.classList.add("open");
+              btn.innerText = "收起详情 ▲";
+            } else {
+              wrapper.classList.remove("open");
+              btn.innerText = "展开详情 ▼";
+            }
+          };
+          card.appendChild(btn);
+          card.dataset.enhanced = "1";
+        });
+      }
+      waitForPlans();
+    })();
+  </script>
+</body>
+</html>
