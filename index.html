@@ -1,85 +1,29 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport"
-        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
+        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
   <title>可云 Premium</title>
 
-  <!-- ========== 基础样式 ========== -->
+  <!-- 引入 Apple Pink 样式 -->
   <link rel="stylesheet" href="./assets/custom-theme.css" />
+</head>
 
-  <!-- ========== KY Popup v2 登录后公告弹窗 ========== -->
-  <style>
-    .ky-popup-mask {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 99999;
-      animation: fadeIn .3s ease forwards;
-    }
-    .ky-popup-box {
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 420px;
-      box-shadow: 0 10px 40px rgba(255, 182, 193, 0.4);
-      animation: slideUp .4s ease;
-      position: relative;
-    }
-    .ky-popup-box h2 {
-      color: #ff6fae;
-      font-size: 20px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .ky-popup-box p {
-      color: #333;
-      margin: 6px 0;
-      font-size: 15px;
-      line-height: 1.6;
-      text-align: center;
-    }
-    .ky-popup-close {
-      position: absolute;
-      top: 10px;
-      right: 16px;
-      font-size: 22px;
-      color: #999;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .ky-popup-close:hover { color: #ff6fae; }
-    .ky-popup-btn {
-      background: linear-gradient(135deg, #ff85c1, #ff6fa8);
-      border: none;
-      border-radius: 8px;
-      padding: 8px 20px;
-      color: #fff;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .ky-popup-btn:hover { opacity: 0.9; }
+<body>
+  <div id="app"></div>
 
-    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-    @keyframes slideUp { from {transform: translateY(20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
-  </style>
-
+  <!-- 可云安全弹窗 -->
   <script>
-  (function () {
-    console.log("可云 KY Popup v2 loaded");
-    const DASHBOARD_PATH = "/#/dashboard";
-    let firstPopupDone = false, secondPopupDone = false, firstClosed = false;
-
-    function showPopup() {
-      if (document.querySelector('.ky-popup-mask')) return;
-      const mask = document.createElement('div');
-      mask.className = 'ky-popup-mask';
-      mask.innerHTML = `
+    (function () {
+      console.log("KY Popup v2 loaded");
+      const DASHBOARD_PATH = "/#/dashboard";
+      let first = false, second = false, closed = false;
+      function showPopup() {
+        if (document.querySelector(".ky-popup-mask")) return;
+        const el = document.createElement("div");
+        el.className = "ky-popup-mask";
+        el.innerHTML = `
         <div class="ky-popup-box">
           <div class="ky-popup-close">×</div>
           <h2>📢 新人必看公告</h2>
@@ -88,78 +32,41 @@
           <p>加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">t.me/ss_keyun</a></p>
           <button class="ky-popup-btn">我已知晓</button>
         </div>`;
-      document.body.appendChild(mask);
-      const close = () => {
-        mask.remove();
-        if (!firstClosed) {
-          firstClosed = true;
-          triggerSecondPopup();
-        }
-      };
-      mask.querySelector(".ky-popup-close").onclick = close;
-      mask.querySelector(".ky-popup-btn").onclick = close;
-    }
-
-    function randomDelay(min, max) {
-      return Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-    }
-
-    function triggerFirstPopup() {
-      if (firstPopupDone) return;
-      firstPopupDone = true;
-      setTimeout(showPopup, randomDelay(3, 10));
-    }
-
-    function triggerSecondPopup() {
-      if (secondPopupDone) return;
-      secondPopupDone = true;
-      setTimeout(() => {
-        document.addEventListener("click", function once() {
-          setTimeout(showPopup, randomDelay(3, 10));
-          document.removeEventListener("click", once);
-        });
-      }, 60000);
-    }
-
-    function checkLoginAndStart() {
-      if (location.href.includes(DASHBOARD_PATH)) {
-        triggerFirstPopup();
-      } else {
-        requestAnimationFrame(checkLoginAndStart);
+        document.body.appendChild(el);
+        const close = () => {
+          el.remove();
+          if (!closed) {
+            closed = true;
+            setTimeout(() => {
+              document.addEventListener("click", function once() {
+                setTimeout(showPopup, 4000);
+                document.removeEventListener("click", once);
+              });
+            }, 60000);
+          }
+        };
+        el.querySelector(".ky-popup-close").onclick = close;
+        el.querySelector(".ky-popup-btn").onclick = close;
       }
-    }
-
-    window.addEventListener("load", checkLoginAndStart);
-  })();
-  </script>
-</head>
-
-<body>
-  <noscript>
-    <strong>您的浏览器未启用 JavaScript，无法加载可云 Premium。</strong>
-  </noscript>
-
-  <div id="app"></div>
-
-  <!-- 手机端增强 -->
-  <script src="./mobile-enhance.js"></script>
-
-  <!-- 主程序 umi.js 加载逻辑 -->
-  <script>
-    (function loadUmi() {
-      const script = document.createElement("script");
-      script.src = "./assets/umi.js";
-      script.type = "text/javascript";
-      script.onload = () => console.log("✅ umi.js 已成功加载");
-      script.onerror = () => {
-        console.error("❌ umi.js 加载失败，检查路径 /assets/umi.js 是否存在。");
-        const msg = document.createElement("div");
-        msg.style = "padding:40px;text-align:center;color:#ff4d6a;font-size:16px;";
-        msg.innerHTML = "❌ 页面加载失败：未找到 umi.js<br>请确认路径 /assets/umi.js 存在且无压缩错误。";
-        document.body.appendChild(msg);
-      };
-      document.body.appendChild(script);
+      function delay(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min) * 1000;
+      }
+      function start() {
+        if (location.href.includes(DASHBOARD_PATH)) {
+          if (!first) {
+            first = true;
+            setTimeout(showPopup, delay(3, 10));
+          }
+        } else requestAnimationFrame(start);
+      }
+      window.addEventListener("load", start);
     })();
   </script>
+
+  <!-- 移动端增强 -->
+  <script src="./mobile-enhance.js"></script>
+
+  <!-- 主程序（降级 umi.js） -->
+  <script src="./assets/umi.js"></script>
 </body>
 </html>
