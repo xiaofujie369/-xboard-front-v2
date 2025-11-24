@@ -6,7 +6,10 @@
         content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
   <title>可云 Premium</title>
 
-  <!-- KY Popup v2：登录成功后公告弹窗（每次登录弹 2 次） -->
+  <!-- ========== 基础样式 ========== -->
+  <link rel="stylesheet" href="./assets/custom-theme.css" />
+
+  <!-- ========== KY Popup v2 登录后公告弹窗 ========== -->
   <style>
     .ky-popup-mask {
       position: fixed;
@@ -69,15 +72,11 @@
   <script>
   (function () {
     console.log("可云 KY Popup v2 loaded");
-
     const DASHBOARD_PATH = "/#/dashboard";
-    let firstPopupDone = false;
-    let secondPopupDone = false;
-    let firstClosed = false;
+    let firstPopupDone = false, secondPopupDone = false, firstClosed = false;
 
     function showPopup() {
       if (document.querySelector('.ky-popup-mask')) return;
-
       const mask = document.createElement('div');
       mask.className = 'ky-popup-mask';
       mask.innerHTML = `
@@ -88,10 +87,8 @@
           <p>请收藏最新地址：<b>shy521.com</b></p>
           <p>加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">t.me/ss_keyun</a></p>
           <button class="ky-popup-btn">我已知晓</button>
-        </div>
-      `;
+        </div>`;
       document.body.appendChild(mask);
-
       const close = () => {
         mask.remove();
         if (!firstClosed) {
@@ -132,40 +129,37 @@
       }
     }
 
-    window.addEventListener("load", () => {
-      checkLoginAndStart();
-    });
+    window.addEventListener("load", checkLoginAndStart);
   })();
   </script>
-
-  <!-- 商务风增强样式 -->
-  <style>
-    .ky-premium-collapse-wrapper {
-      max-height: 120px;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
-    }
-    .ky-premium-collapse-wrapper.open {
-      max-height: 800px;
-    }
-    .ky-premium-btn {
-      margin-top: 8px;
-      text-align: center;
-      font-size: 13px;
-      color: #ff6fa8;
-      cursor: pointer;
-      user-select: none;
-    }
-  </style>
 </head>
 
 <body>
+  <noscript>
+    <strong>您的浏览器未启用 JavaScript，无法加载可云 Premium。</strong>
+  </noscript>
+
   <div id="app"></div>
 
-  <!-- 引入移动端增强脚本 -->
+  <!-- 手机端增强 -->
   <script src="./mobile-enhance.js"></script>
 
-  <!-- 引入主应用入口 -->
-  <script src="./assets/umi.js"></script>
+  <!-- 主程序 umi.js 加载逻辑 -->
+  <script>
+    (function loadUmi() {
+      const script = document.createElement("script");
+      script.src = "./assets/umi.js";
+      script.type = "text/javascript";
+      script.onload = () => console.log("✅ umi.js 已成功加载");
+      script.onerror = () => {
+        console.error("❌ umi.js 加载失败，检查路径 /assets/umi.js 是否存在。");
+        const msg = document.createElement("div");
+        msg.style = "padding:40px;text-align:center;color:#ff4d6a;font-size:16px;";
+        msg.innerHTML = "❌ 页面加载失败：未找到 umi.js<br>请确认路径 /assets/umi.js 存在且无压缩错误。";
+        document.body.appendChild(msg);
+      };
+      document.body.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
