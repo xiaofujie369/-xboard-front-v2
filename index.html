@@ -1,72 +1,107 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no" />
-  <title>可云 Premium</title>
+<script>
+(function () {
+  console.log("可云 Popup loaded");
 
-  <!-- 引入 Apple Pink 样式 -->
-  <link rel="stylesheet" href="./assets/custom-theme.css" />
-</head>
+  // =============== 配置 ===============
+  const FIRST_DELAY = 3000;      // 第一次弹窗延迟
+  const CLICK_WINDOW = 60000;    // 第二次点击监控时间
 
-<body>
-  <div id="app"></div>
+  let firstDone = false;
+  let secondDone = false;
+  let popupVisible = false;
 
-  <!-- 可云安全弹窗 -->
-  <script>
-    (function () {
-      console.log("KY Popup v2 loaded");
-      const DASHBOARD_PATH = "/#/dashboard";
-      let first = false, second = false, closed = false;
-      function showPopup() {
-        if (document.querySelector(".ky-popup-mask")) return;
-        const el = document.createElement("div");
-        el.className = "ky-popup-mask";
-        el.innerHTML = `
-        <div class="ky-popup-box">
-          <div class="ky-popup-close">×</div>
-          <h2>📢 新人必看公告</h2>
-          <p>欢迎来到可云，请务必阅读顶部公告栏信息。</p>
-          <p>请收藏最新地址：<b>shy521.com</b></p>
-          <p>加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">t.me/ss_keyun</a></p>
-          <button class="ky-popup-btn">我已知晓</button>
-        </div>`;
-        document.body.appendChild(el);
-        const close = () => {
-          el.remove();
-          if (!closed) {
-            closed = true;
-            setTimeout(() => {
-              document.addEventListener("click", function once() {
-                setTimeout(showPopup, 4000);
-                document.removeEventListener("click", once);
-              });
-            }, 60000);
-          }
-        };
-        el.querySelector(".ky-popup-close").onclick = close;
-        el.querySelector(".ky-popup-btn").onclick = close;
+  // =============== 创建弹窗 ===============
+  function showPopup() {
+    if (popupVisible) return;
+    popupVisible = true;
+
+    const mask = document.createElement("div");
+    mask.id = "kyPopupMask";
+    mask.style.cssText = `
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.55);
+      display:flex; justify-content:center; align-items:center;
+      z-index: 999999;
+    `;
+
+    const box = document.createElement("div");
+    box.className = "ky-popup-box";
+    box.style.cssText = `
+      width: 320px; background:#fff; border-radius:16px;
+      padding:22px; text-align:center; font-size:15px;
+      box-shadow:0 4px 20px rgba(0,0,0,.18);
+      animation: popupShow .25s ease;
+    `;
+
+    box.innerHTML = `
+      <div class="ky-popup-close" style="
+        position:absolute;right:14px;top:10px;
+        font-size:22px;color:#999;cursor:pointer;">×</div>
+
+      <h2 style="font-size:20px;margin:10px 0 14px;color:#ff68a0;">📢 新人必看公告</h2>
+
+      <p style="line-height:1.6;">欢迎来到可云，请务必阅读顶部公告栏信息。</p>
+      <p style="line-height:1.6;">请收藏最新地址：<b>shy521.com</b></p>
+      <p style="line-height:1.6;margin-bottom:16px;">
+        加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">t.me/ss_keyun</a>
+      </p>
+
+      <button class="ky-popup-btn" style="
+        background:#ff68a0;color:#fff;border:none;
+        padding:10px 24px;border-radius:10px;
+        font-size:15px;cursor:pointer;">我已知晓</button>
+    `;
+
+    mask.appendChild(box);
+    document.body.appendChild(mask);
+
+    // 关闭按钮
+    box.querySelector(".ky-popup-close").onclick =
+      box.querySelector(".ky-popup-btn").onclick =
+      () => {
+        popupVisible = false;
+        mask.remove();
+        onPopupClosed();
+      };
+  }
+
+  // =============== 弹窗关闭后 ===============
+  function onPopupClosed() {
+    if (!firstDone) {
+      firstDone = true;
+      startClickMonitor();
+    } else if (!secondDone) {
+      secondDone = true;
+    }
+  }
+
+  // =============== 监听第二次弹窗 ===============
+  function startClickMonitor() {
+    const handler = () => {
+      if (!secondDone && !popupVisible) {
+        showPopup();
       }
-      function delay(min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-      }
-      function start() {
-        if (location.href.includes(DASHBOARD_PATH)) {
-          if (!first) {
-            first = true;
-            setTimeout(showPopup, delay(3, 10));
-          }
-        } else requestAnimationFrame(start);
-      }
-      window.addEventListener("load", start);
-    })();
-  </script>
+      document.removeEventListener("click", handler);
+    };
 
-  <!-- 移动端增强 -->
-  <script src="./mobile-enhance.js"></script>
+    document.addEventListener("click", handler);
 
-  <!-- 主程序（降级 umi.js） -->
-  <script src="./assets/umi.js"></script>
-</body>
-</html>
+    setTimeout(() => {
+      document.removeEventListener("click", handler);
+    }, CLICK_WINDOW);
+  }
+
+  // =============== 第一次弹窗启动 ===============
+  function startFirstPopup() {
+    setTimeout(() => {
+      if (!firstDone) showPopup();
+    }, FIRST_DELAY);
+  }
+
+  // =============== 入口（等 React 完成） ===============
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(startFirstPopup, 2000);
+  });
+
+})();
+</script>
