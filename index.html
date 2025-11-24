@@ -1,85 +1,74 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
-
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
   <title>可云</title>
 
-  <!-- 强制验证（验证失败会自动跳 verify.html） -->
+  <!-- 验证（无验证会跳 verify.html） -->
   <script>
-    (function () {
-      const verified = localStorage.getItem("cf_verified");
-
-      // 如果没有通过验证 → 自动跳转 verify.html
-      if (!verified) {
-        if (!location.pathname.includes("verify.html")) {
-          window.location.href = "/verify.html";
-        }
-      }
-    })();
+    const pass = localStorage.getItem("cf_verified");
+    if (!pass && !location.pathname.includes("verify.html")) {
+      location.href = "/verify.html";
+    }
   </script>
 
   <!-- 自定义主题 -->
-  <link rel="stylesheet" href="/custom-theme.css">
+  <link rel="stylesheet" href="/custom-theme.css"/>
 
-  <!-- 移动端折叠增强 -->
+  <!-- 移动增强（折叠） -->
   <script defer src="/mobile-enhance.js"></script>
 
-  <!-- Umi 主框架（慎重必须在 HEAD） -->
+  <!-- Umi 入口（必须放 HEAD） -->
   <script type="module" crossorigin src="/assets/umi.js"></script>
 </head>
 
+
 <body>
-  <!-- 站点环境配置 -->
+  <!-- 环境变量 -->
   <script src="/env.js"></script>
 
-  <!-- ⭐ React 的挂载点（必须是 root，否则白屏！！！） -->
+  <!-- ⭐⭐ 必须是 root，否则 Umi 不渲染 ⭐⭐ -->
   <div id="root"></div>
 
-  <!-- ⭐⭐⭐ 弹窗系统（最终整合版） ⭐⭐⭐ -->
+
+  <!-- ========================================================= -->
+  <!-- 🚀 弹窗脚本（必须放在最底部，避免阻塞 Umi 渲染） -->
+  <!-- ========================================================= -->
   <script>
     (function () {
       console.log("可云 Popup loaded");
 
-      // 配置
-      const FIRST_DELAY = 3000;     // 第一次延迟弹窗
-      const CLICK_WINDOW = 60000;   // 第二次点击触发监控
+      const FIRST_DELAY = 3000;
+      const CLICK_WINDOW = 60000;
 
       let firstDone = false;
       let secondDone = false;
       let popupVisible = false;
 
-      // 创建弹窗
       function showPopup() {
         if (popupVisible) return;
         popupVisible = true;
 
         const mask = document.createElement("div");
-        mask.id = "kyPopupMask";
         mask.style.cssText = `
-          position: fixed; inset: 0;
-          background: rgba(0,0,0,.55);
-          display:flex; justify-content:center; align-items:center;
+          position:fixed;inset:0;background:rgba(0,0,0,.55);
+          display:flex;justify-content:center;align-items:center;
           z-index:999999;
         `;
 
         const box = document.createElement("div");
-        box.className = "ky-popup-box";
         box.style.cssText = `
-          width: 320px; background:#fff; border-radius:16px;
-          padding:22px; text-align:center; font-size:15px;
-          box-shadow:0 4px 22px rgba(0,0,0,.15);
-          position:relative;
+          width:320px;background:#fff;padding:22px;border-radius:16px;
+          text-align:center;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.18);
         `;
 
         box.innerHTML = `
-          <div class="ky-popup-close" style="
-            position:absolute;right:14px;top:10px;
-            font-size:22px;color:#999;cursor:pointer;">×</div>
+          <div style="
+            position:absolute;top:10px;right:12px;font-size:22px;
+            cursor:pointer;color:#999;">×</div>
 
-          <h2 style="font-size:20px;margin:10px 0 14px;color:#ff68a0;">📢 新人必看公告</h2>
+          <h2 style="color:#ff68a0;font-size:20px;margin-bottom:12px;">📢 新人必看公告</h2>
 
           <p style="line-height:1.6;">欢迎来到可云，请务必阅读顶部公告栏信息。</p>
           <p style="line-height:1.6;">请收藏最新地址：<b>shy521.com</b></p>
@@ -87,27 +76,25 @@
             加入 TG 群组：<a href="https://t.me/ss_keyun" target="_blank">t.me/ss_keyun</a>
           </p>
 
-          <button class="ky-popup-btn" style="
-            background:#ff68a0;color:white;border:none;
-            padding:10px 24px;border-radius:10px;
-            font-size:15px;cursor:pointer;">我已知晓</button>
+          <button style="
+            background:#ff68a0;color:#fff;padding:10px 24px;border:none;
+            border-radius:10px;font-size:15px;cursor:pointer;">我已知晓</button>
         `;
 
         mask.appendChild(box);
         document.body.appendChild(mask);
 
-        const close = () => {
+        const closeFn = () => {
           popupVisible = false;
           mask.remove();
-          onPopupClosed();
+          onClose();
         };
 
-        box.querySelector(".ky-popup-close").onclick = close;
-        box.querySelector(".ky-popup-btn").onclick = close;
+        box.querySelector("div").onclick = closeFn;
+        box.querySelector("button").onclick = closeFn;
       }
 
-      // 弹窗关闭后的逻辑
-      function onPopupClosed() {
+      function onClose() {
         if (!firstDone) {
           firstDone = true;
           startClickMonitor();
@@ -116,7 +103,6 @@
         }
       }
 
-      // 开启第二次点击监控
       function startClickMonitor() {
         const handler = () => {
           if (!secondDone && !popupVisible) {
@@ -126,29 +112,22 @@
         };
 
         document.addEventListener("click", handler);
-        setTimeout(() => {
-          document.removeEventListener("click", handler);
-        }, CLICK_WINDOW);
+        setTimeout(() => document.removeEventListener("click", handler), CLICK_WINDOW);
       }
 
-      function startFirstPopup() {
+      document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           if (!firstDone) showPopup();
         }, FIRST_DELAY);
-      }
-
-      // 等待 umi 渲染稳定后再启动弹窗（避免 DOM 未准备好）
-      document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(startFirstPopup, 2000);
       });
 
     })();
   </script>
+  <!-- ========================================================= -->
+
 
   <!-- Cloudflare Insights -->
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015"
-          integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
-          data-cf-beacon='{"version":"2024.11.0","token":"ac8aa340be544d58b4d30fbcc83a6440"}'
           crossorigin="anonymous"></script>
 </body>
 </html>
